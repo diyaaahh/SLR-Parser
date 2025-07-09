@@ -87,9 +87,13 @@ tabs = st.tabs(["FIRST & FOLLOW Sets", "SLR Item Sets", "Parsing Table", "Parsin
 with tabs[0]:
     st.subheader("FIRST & FOLLOW Sets")
     st.markdown("### FIRST Sets")
-    st.table({nt: ', '.join(sorted(s)) for nt, s in first_sets.items()})
+    # Exclude S' from FIRST sets display
+    first_display = {nt: ', '.join(sorted(s)) for nt, s in first_sets.items() if nt != "S'"}
+    st.table(first_display)
     st.markdown("### FOLLOW Sets")
-    st.table({nt: ', '.join(sorted(s)) for nt, s in follow_sets.items()})
+    # Exclude S' from FOLLOW sets display
+    follow_display = {nt: ', '.join(sorted(s)) for nt, s in follow_sets.items() if nt != "S'"}
+    st.table(follow_display)
 
 with tabs[1]:
     st.subheader("SLR Item Sets")
