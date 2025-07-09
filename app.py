@@ -67,6 +67,20 @@ def item_to_str(lhs, rhs, dot_pos):
     rhs_with_dot.insert(dot_pos, '•')
     return f"{lhs} -> {' '.join(rhs_with_dot)}"
 
+# Create a mapping to track how each item set was created
+def build_predecessor_map(item_sets, goto_table):
+    """Build a mapping from item set index to its predecessor information"""
+    predecessor_map = {}
+    predecessor_map[0] = None  # Initial state has no predecessor
+    
+    for (state_idx, symbol), target_idx in goto_table.items():
+        if target_idx not in predecessor_map:
+            predecessor_map[target_idx] = (state_idx, symbol)
+    
+    return predecessor_map
+
+predecessor_map = build_predecessor_map(item_sets, goto_table)
+
 # Main area with tabs
 tabs = st.tabs(["FIRST & FOLLOW Sets", "SLR Item Sets", "Parsing Table", "Parsing Steps"])
 
@@ -80,17 +94,18 @@ with tabs[0]:
 with tabs[1]:
     st.subheader("SLR Item Sets")
     for idx, item_set in enumerate(item_sets):
-        goto_dict = {}
-        for symbol in symbols:
-            target = goto(item_set, symbol, grammar)
-            if target:
-                target_idx = item_set_map.get(frozenset(target))
-                if target_idx is not None:
-                    goto_dict[symbol] = f"I{target_idx}"
-        with st.expander(f"Item Set I{idx}"):
-            if goto_dict:
-                st.markdown("**GOTO transitions:**")
-                st.table({k: v for k, v in goto_dict.items()})
+        # Create header with predecessor information
+        if idx == 0:
+            header = f"Item Set I{idx} (Initial State)"
+        else:
+            pred_info = predecessor_map.get(idx)
+            if pred_info:
+                pred_state, symbol = pred_info
+                header = f"Item Set I{idx} = GOTO(I{pred_state}, {symbol})"
+            else:
+                header = f"Item Set I{idx}"
+        
+        with st.expander(header):
             st.markdown("**Items:**")
             for item in sorted(item_set):
                 st.write(item_to_str(*item))
@@ -173,4 +188,4 @@ with tabs[3]:
             steps[-1]['Action'] += ' (Error)'
             break
     st.markdown("**Legend:** Red row = shift/reduce conflict encountered.")
-    st.table(steps) 
+    st.table(steps)

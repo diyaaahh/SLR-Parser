@@ -241,4 +241,8 @@ def build_slr_parsing_table(grammar: Grammar, item_sets, goto_table, follow_sets
         for A in nonterminals:
             if (i, A) in goto_table:
                 goto_table_out[(i, A)] = goto_table[(i, A)]
+    print("=== ACTION TABLE ===")
+    for k, v in action_table.items():
+        print(f"State {k[0]}, Symbol '{k[1]}': {v}")
+    print("FOLLOW(L):", follow_sets['L'])
     return action_table, goto_table_out
